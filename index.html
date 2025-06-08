@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Couple's Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neon: {
+                            pink: '#ff00ff',
+                            purple: '#9d00ff',
+                            blue: '#00f0ff'
+                        }
+                    },
+                    fontFamily: {
+                        'retro': ['"Press Start 2P"', 'cursive'],
+                        'arcade': ['"Arcade Interlaced"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Arcade Interlaced';
+            src: url('https://fonts.cdnfonts.com/css/arcade-interlaced');
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            animation: flicker 1.5s infinite alternate;
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, inset 0 0 10px #ff00ff;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px) rotateX(5deg);
+            box-shadow: 0 15px 30px rgba(255, 0, 255, 0.5);
+        }
+        
+        .card.flipped {
+            background: linear-gradient(135deg, rgba(157, 0, 255, 0.7), rgba(255, 0, 255, 0.7));
+            box-shadow: 0 0 20px #9d00ff, 0 0 40px #9d00ff, inset 0 0 10px #9d00ff;
+        }
+        
+        .hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+        
+        .visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            }
+            20%, 24%, 55% {        
+                text-shadow: none;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            }
+            50% {
+                box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 font-['Arcade_Interlaced']">
+    <div class="max-w-4xl w-full text-center">
+        <!-- Header -->
+        <div class="mb-8 animate-bounce">
+            <h1 class="text-4xl md:text-6xl font-retro neon-text text-neon-pink mb-4">LOVERS' ARCADE</h1>
+            <p class="text-xl text-neon-purple mb-2">~ Ambil kartu secara bergantian, have fun... ~</p>
+            <div class="h-1 w-32 bg-neon-pink mx-auto mb-6 neon-border"></div>
+        </div>
+        
+        <!-- Cards Grid -->
+        <div id="cardContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <!-- Reset Button -->
+        <button id="resetBtn" class="px-6 py-3 bg-black text-neon-pink font-retro text-sm uppercase tracking-wider border-2 border-neon-pink rounded neon-border hover:bg-neon-pink hover:text-black transition-all mb-8 hidden">
+            RESET GAME
+        </button>
+        
+        <!-- Special Cards (hidden initially) -->
+        <div id="specialCards" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <div class="special-card card bg-black border-2 border-neon-blue p-6 rounded-lg flex flex-col items-center justify-center neon-border cursor-pointer transform transition-all hover:scale-105" onclick="selectSpecialCard(0)">
+                <div class="text-neon-blue text-5xl mb-4">🔥</div>
+                <h3 class="text-xl font-retro text-neon-blue mb-2">SECRET 1</h3>
+                <p class="text-neon-purple text-sm">Click to reveal</p>
+            </div>
+            <div class="special-card card bg-black border-2 border-neon-pink p-6 rounded-lg flex flex-col items-center justify-center neon-border cursor-pointer transform transition-all hover:scale-105" onclick="selectSpecialCard(1)">
+                <div class="text-neon-pink text-5xl mb-4">🔥</div>
+                <h3 class="text-xl font-retro text-neon-pink mb-2">SECRET 2</h3>
+                <p class="text-neon-purple text-sm">Click to reveal</p>
+            </div>
+            <div class="special-card card bg-black border-2 border-neon-purple p-6 rounded-lg flex flex-col items-center justify-center neon-border cursor-pointer transform transition-all hover:scale-105" onclick="selectSpecialCard(2)">
+                <div class="text-neon-purple text-5xl mb-4">🔥</div>
+                <h3 class="text-xl font-retro text-neon-purple mb-2">SECRET 3</h3>
+                <p class="text-neon-purple text-sm">Click to reveal</p>
+            </div>
+        </div>
+        
+        <!-- Completion Message -->
+        <div id="completionMessage" class="mt-12 text-neon-pink font-retro text-xl neon-text hidden">
+            CHOOSE YOUR FINAL CHALLENGE!
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const cardsData = [
+            "Oral sex partermu selama satu putaran lagu",
+            "Tutup mata partnermu, kemudian beri jilatan dan sentuhan di bagian tubuh random",
+            "Gunakan lidahmu untuk membuat “jejak” dari leher ke perut tanpa melewatkan bagian sensitif",
+            "Tukar peran foreplay dominan dan submissive selama 5 menit",
+            "Selama 3 menit, tidak boleh berbicara. Hanya ciuman, sentuhan, dan bahasa tubuh",
+            "Gunakan lidah untuk menulis huruf A sampai Z di tempat sensitif",
+            "Bisikkan 3 hal yang bikin kamu pengen banget dia malam ini",
+            "Rabalah area leher dan telinga pasangan selama 2 menit",
+            "Mainkan jari kamu di paha pasangan, tanpa menyentuh area intim",
+            "Cium dari leher ke perut, pelan-pelan",
+            "Lakukan tease dengan lidah di telinga, dada, atau paha",
+            "Berikan oral ringan selama 1 menit, lalu berhenti",
+            "Satu ronde “truth or moan” – harus jujur atau berikan erangan",
+            "Biarkan pasangan dominasi penuh kamu selama 1 durasi lagu",
+            "Lakukan oral dengan teknik favoritmu selama 3 menit",
+        ];
+        
+        let flippedCards = [];
+        let gameCompleted = false;
+        
+        // Initialize game
+        function initGame() {
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = '';
+            flippedCards = [];
+            gameCompleted = false;
+            
+            // Shuffle cards
+            const shuffledCards = [...cardsData].sort(() => Math.random() - 0.5);
+            
+            // Create cards
+            shuffledCards.forEach((text, index) => {
+                const card = document.createElement('div');
+                card.className = 'card bg-black border-2 border-neon-pink p-4 rounded-lg flex items-center justify-center neon-border cursor-pointer h-40 md:h-48 text-center';
+                card.innerHTML = `
+                    <div class="card-front">
+                        <div class="text-3xl text-neon-pink">🔥</div>
+                    </div>
+                    <div class="card-back hidden text-neon-pink text-sm md:text-base">
+                        ${text}
+                    </div>
+                `;
+                card.addEventListener('click', () => flipCard(card, index));
+                cardContainer.appendChild(card);
+            });
+            
+            // Hide special cards and reset button
+            document.getElementById('specialCards').classList.add('hidden');
+            document.getElementById('completionMessage').classList.add('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+        }
+        
+        // Flip card
+        function flipCard(card, index) {
+            if (flippedCards.includes(index) || gameCompleted) return;
+            
+            const front = card.querySelector('.card-front');
+            const back = card.querySelector('.card-back');
+            
+            front.classList.add('hidden');
+            back.classList.remove('hidden');
+            card.classList.add('flipped');
+            
+            if (!flippedCards.includes(index)) {
+                flippedCards.push(index);
+                
+                // Vibrate on flip
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                // Play sound effect
+                const flipSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + Array(1000).join('A'));
+                flipSound.volume = 0.2;
+                flipSound.play().catch(e => {});
+            }
+            
+            // Check if all cards are flipped
+            if (flippedCards.length === cardsData.length) {
+                gameCompleted = true;
+                showSpecialCards();
+            }
+            
+            // Show reset button if at least one card is flipped
+            if (flippedCards.length > 0) {
+                document.getElementById('resetBtn').classList.remove('hidden');
+            }
+        }
+        
+        // Show special cards
+        function showSpecialCards() {
+            setTimeout(() => {
+                document.getElementById('completionMessage').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    const specialCards = document.getElementById('specialCards');
+                    specialCards.classList.remove('hidden');
+                    specialCards.classList.add('visible');
+                    
+                    // Add animation to special cards
+                    const specialCardElements = document.querySelectorAll('.special-card');
+                    specialCardElements.forEach((card, i) => {
+                        card.style.transitionDelay = `${i * 0.2}s`;
+                        card.classList.add('pulse');
+                    });
+                }, 1000);
+            }, 500);
+        }
+        
+        // Select special card
+        function selectSpecialCard(index) {
+            if (!gameCompleted) return;
+            
+            const specialCards = document.querySelectorAll('.special-card');
+            const secretRoles = [
+                "PRIVATE CLASS: Roleplay jadi less private, cewe (guru private), cowo (siswa less). Disini cewe harus menjadi dominan",
+                "OUR HOTELS: Roleplay housekeeping hotel, cewe (house keeping), cowo (tamu). Disini cowo harus menjadi dominan",
+                "YOU ARE ACTOR! : Ikutin adegan video porno",
+            ];
+            
+            specialCards.forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('flipped');
+                    card.innerHTML = `
+                        <div class="text-4xl animate-pulse mb-4">${['⚡', '👁️', '🔄'][i]}</div>
+                        <h3 class="text-xl font-retro mb-2">${secretRoles[i].split(':')[0]}</h3>
+                        <p class="text-sm">${secretRoles[i].split(':')[1]}</p>
+                        <p class="text-xs mt-2 text-neon-pink">Click again to confirm choice</p>
+                    `;
+                    
+                    // On second click, lock in the choice
+                    card.onclick = () => {
+                        card.innerHTML = `
+                            <div class="text-4xl animate-pulse mb-4">🔥</div>
+                            <h3 class="text-xl font-retro mb-2">LOCKED IN!</h3>
+                            <p class="text-sm">${secretRoles[i].split(':')[1]}</p>
+                        `;
+                        card.style.pointerEvents = 'none';
+                        card.onclick = null;
+                    };
+                } else {
+                    card.style.opacity = '0.3';
+                    card.style.pointerEvents = 'none';
+                }
+            });
+            
+            // Vibrate on selection
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('resetBtn').addEventListener('click', initGame);
+        
+        // Initialize on load
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
